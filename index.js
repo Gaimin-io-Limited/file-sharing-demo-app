@@ -11,7 +11,8 @@ const stats = fs.statSync(`./${FILE_NAME}`)
 const chunkSize = 5 * 1024 * 1024;
 const numChunks = Math.ceil(stats.size / chunkSize);
 
-const cloudServerAPI = 'https://api.qa.gaimin.cloud/api/v0/file-sharing' // should be replaced domain later to api.gaimin.gg
+// for prod env remove '.qa'
+const cloudServerAPI = 'https://api.qa.gaimin.cloud/api/v0/file-sharing'
 const authServerAPI = 'https://api.qa.auth.gaimin.io/api'
 
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A'
