@@ -3,14 +3,13 @@ const axios = require('axios');
 const fs = require('fs');
 
 // Name / path  of the file to upload
-const FILE_NAME = '305-536x354.jpg'
+const FILE_NAME = 'index.js'
 
 // Read the entire file into memory
 const file = fs.readFileSync(`./${FILE_NAME}`);
 
 // Get file metadata (like size)
 const stats = fs.statSync(`./${FILE_NAME}`)
-
 
 // Define chunk size (5MB) and calculate how many chunks the file needs
 const chunkSize = 5 * 1024 * 1024;
@@ -20,7 +19,6 @@ const numChunks = Math.ceil(stats.size / chunkSize);
 const cloudServerAPI = 'https://api.gaimin.cloud/api/v0/file-sharing'
 const authServerAPI = 'https://api.auth.gaimin.io/api'
 
-// Auth tokens
 // Gaimin SSO token - token used mainly on UI, can be copied from Auth header
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A'
 // Secret key - static all time active token. can be received via API or on UI. Recommended way to get API token
@@ -143,7 +141,6 @@ async function markFileUploadAsCompleted(filename, etags, uuid) {
 }
 
 // Main flow: Starts upload process by getting pre-signed URLs, uploading file parts, and finalizing
-
 function initUpload(){
     getPreSignedUrl().then(({data}) => {
         console.log('data', data)
@@ -152,6 +149,21 @@ function initUpload(){
 
             markFileUploadAsCompleted(data.fileName, etags, uuid).then((completeData) => {
                 console.log('completeData' , completeData);
+                // correct response with url ( download link)
+                // {
+                //     data: {
+                //         uuid: '3b5b08a8-16e2-425f-9b8f-3db53cbef673',
+                //             createdAt: '2025-03-27T09:59:44.631372Z',
+                //             updatedAt: '2025-03-27T09:59:49.710597199Z',
+                //             name: 'index.js',
+                //             sizeInBytes: 5773,
+                //             url: 'https://api.gaimin.cloud/api/file-sharing/files/3b5b08a8-16e2-425f-9b8f-3db53cbef673',
+                //             status: 'SHARING',
+                //             contentId: 'QmepVLotNhk5XucQJMmgBb94rKs47fUNH1LjLXcphXSJtx'
+                //     },
+                //     success: true
+                // }
+
             })
         });
     })
