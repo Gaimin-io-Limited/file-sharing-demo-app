@@ -11,12 +11,12 @@ const stats = fs.statSync(`./${FILE_NAME}`)
 const chunkSize = 5 * 1024 * 1024;
 const numChunks = Math.ceil(stats.size / chunkSize);
 
-// for prod env remove '.qa'
+
 const cloudServerAPI = 'https://api.gaimin.cloud/api/v0/file-sharing'
 const authServerAPI = 'https://api.auth.gaimin.io/api'
 
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A'
-let gaiminSecretKey = ''
+let gaiminSecretKey = '$2a$10$Qv3BQzvt5o61mFSUfJahMuJMp.0wkgTMM4oQ5z80ip4ua.9iuw0cy'
 
 
 async function getSecretKey(){
@@ -39,7 +39,7 @@ async function getApiToken(){
     }, {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': gaiminSSOtoken,
+            'Authorization': gaiminSecretKey,
         },
     });
 
