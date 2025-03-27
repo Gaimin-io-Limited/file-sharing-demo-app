@@ -22,7 +22,7 @@ const authServerAPI = 'https://api.auth.gaimin.io/api';
 // Authentication Tokens:
 // SSO Token (obtained from UI, should be replaced with a valid one)
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A';
-// Static secret key (can be retrieved via API or UI)
+// Static secret key (can be retrieved via API or UI). Recommended way to copy from UI and store in your code secrets.
 let gaiminSecretKey = '$2a$10$Qv3BQzvt5o61mFSUfJahMuJMp.0wkgTMM4oQ5z80ip4ua.9iuw0cy';
 
 // Step 1: Get the secret key using SSO token (scoped for file-sharing)
