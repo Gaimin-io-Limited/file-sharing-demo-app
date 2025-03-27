@@ -1,24 +1,32 @@
+// Required Node.js modules to be ablr to run requsts and excess files.
 const axios = require('axios');
 const fs = require('fs');
 
+// Name / path  of the file to upload
 const FILE_NAME = '305-536x354.jpg'
 
+// Read the entire file into memory
 const file = fs.readFileSync(`./${FILE_NAME}`);
+
+// Get file metadata (like size)
 const stats = fs.statSync(`./${FILE_NAME}`)
 
 
-// from 5mb to 5gb
+// Define chunk size (5MB) and calculate how many chunks the file needs
 const chunkSize = 5 * 1024 * 1024;
 const numChunks = Math.ceil(stats.size / chunkSize);
 
-
+// Define API endpoints for cloud file upload and authentication
 const cloudServerAPI = 'https://api.gaimin.cloud/api/v0/file-sharing'
 const authServerAPI = 'https://api.auth.gaimin.io/api'
 
+// Auth tokens
+// Gaimin SSO token - token used mainly on UI, can be copied from Auth header
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A'
+// Secret key - static all time active token. can be received via API or on UI. Recommended way to get API token
 let gaiminSecretKey = '$2a$10$Qv3BQzvt5o61mFSUfJahMuJMp.0wkgTMM4oQ5z80ip4ua.9iuw0cy'
 
-
+// Step 1: Get the secret key using SSO token (scoped for file-sharing)
 async function getSecretKey(){
     const response = await axios.post(authServerAPI + '/auth/secret-key', {
         "scopes": [
@@ -33,6 +41,8 @@ async function getSecretKey(){
     gaiminSecretKey = response.data['data'];
 }
 
+// Step 2: Get API token using the retrieved secret key
+// API token - short time living token used to access all file-sharing endpoints
 async function getApiToken(){
     const response = await axios.post(authServerAPI + '/auth/api-token', {
         "secretKey": gaiminSecretKey
@@ -42,11 +52,11 @@ async function getApiToken(){
             'Authorization': gaiminSecretKey,
         },
     });
-
+    // Store the API token to use in headers for next requests
     jsonAndAuthHeader.Authorization = response.data['data']
 }
 
-
+// Headers to use with authenticated JSON requests
 const jsonAndAuthHeader = {
     'Authorization': '',
     'Content-Type': "application/json",
@@ -54,7 +64,7 @@ const jsonAndAuthHeader = {
 }
 
 
-
+// Step 3: Request a list of pre-signed URLs for multipart upload
 async function getPreSignedUrl() {
     const url = cloudServerAPI + '/files/upload/start'
 
@@ -71,7 +81,7 @@ async function getPreSignedUrl() {
     return await request.data
 }
 
-//> 5GB, for smaller file it can be one single chunk
+// Step 4: Upload each chunk of the file to its corresponding pre-signed URL
 async function uploadLargeFile({fileName: fileName, uploadUrls: presignedUrls,uuid}) {
     const etags = [];
 
@@ -81,6 +91,7 @@ async function uploadLargeFile({fileName: fileName, uploadUrls: presignedUrls,uu
         const presignedUrl = presignedUrls[partNumber];
 
         try {
+            // Upload a single part of the file
             const etag = await uploadChunk(file, presignedUrl, partNumber + 1, start, end);
             etags.push({PartNumber: partNumber + 1, ETag: etag});
         } catch (error) {
@@ -92,6 +103,7 @@ async function uploadLargeFile({fileName: fileName, uploadUrls: presignedUrls,uu
     return [etags,uuid];
 }
 
+// Helper: Upload a single chunk to a given presigned URL
 async function uploadChunk(file, presignedUrl, partNumber, start, end) {
     const chunk = file.slice(start, end);
     const response = await axios.put(presignedUrl, chunk, {
@@ -100,12 +112,16 @@ async function uploadChunk(file, presignedUrl, partNumber, start, end) {
         },
         timeout: 99999999,
     });
+
+    // Return the ETag (used later to finalize the upload)
     return response.headers['etag'].slice(1, -1);
 }
 
+// Step 5: Notify the server that upload is complete and provide all ETags
 async function markFileUploadAsCompleted(filename, etags, uuid) {
     const url = cloudServerAPI + '/files/upload/complete'
 
+    // Format the ETags into expected format
     const etagsData = etags.map((el) => {
         return {
             partNumber: el.PartNumber,
@@ -126,6 +142,7 @@ async function markFileUploadAsCompleted(filename, etags, uuid) {
     return request.data
 }
 
+// Main flow: Starts upload process by getting pre-signed URLs, uploading file parts, and finalizing
 
 function initUpload(){
     getPreSignedUrl().then(({data}) => {
@@ -134,21 +151,22 @@ function initUpload(){
             const [etags,uuid] = uploadFileData
 
             markFileUploadAsCompleted(data.fileName, etags, uuid).then((completeData) => {
-                console.log(completeData);
+                console.log('completeData' , completeData);
             })
         });
     })
 }
 
+// Entry point: authenticate then run upload process
 async function init(){
     if (gaiminSecretKey) {
-        await getApiToken()
+        await getApiToken(); // reuse existing secret key
         await initUpload();
     }
     else {
         await getSecretKey();
-        await getApiToken()
-        await initUpload();
+        await getApiToken();  // fetch secret key
+        await initUpload(); // then get API token
     }
 
 }
