@@ -12,8 +12,8 @@ const chunkSize = 5 * 1024 * 1024;
 const numChunks = Math.ceil(stats.size / chunkSize);
 
 // for prod env remove '.qa'
-const cloudServerAPI = 'https://api.qa.gaimin.cloud/api/v0/file-sharing'
-const authServerAPI = 'https://api.qa.auth.gaimin.io/api'
+const cloudServerAPI = 'https://api.gaimin.cloud/api/v0/file-sharing'
+const authServerAPI = 'https://api.auth.gaimin.io/api'
 
 const gaiminSSOtoken = 'Bearer eyJraWQiOiIxIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiI3MjYiLCJpc3MiOiJodHRwczovL2FwaS5xYS5hdXRoLmdhaW1pbi5pbyIsImlhdCI6MTc0MjQ4MjYzMywiZXhwIjoxNzQyNDg2MjMzfQ.Pm_Xztk-orDwyv0rL4tOuVFVHq7QlolBP17MmbQ2Jmie4GoUXhJxDWRSlV13MoVKuaePfatiLRpyZiAkRzJH-A'
 let gaiminSecretKey = ''
@@ -89,7 +89,6 @@ async function uploadLargeFile({fileName: fileName, uploadUrls: presignedUrls,uu
         }
     }
 
-    console.log(etags);
     return [etags,uuid];
 }
 
